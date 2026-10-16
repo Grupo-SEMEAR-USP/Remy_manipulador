@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<robot name="Manip_revis" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="usar_fake_hardware" default="false" />
+
+  <ros2_control name="IgnitionSystem" type="system">
+    ...
+  <hardware>
+    <xacro:if value="$(arg usar_fake_hardware)">
+      <plugin>mock_components/GenericSystem</plugin>
+    </xacro:if>
+    <xacro:unless value="$(arg usar_fake_hardware)">
+      <plugin>ign_ros2_control/IgnitionSystem</plugin>
+    </xacro:unless>
+  </hardware>
+
+    <joint name="junta_ombro">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-0.7</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="junta_cotovelo">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-0.4</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="junta_punho">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-1.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <parameters>$(find manip_revis_description)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>
