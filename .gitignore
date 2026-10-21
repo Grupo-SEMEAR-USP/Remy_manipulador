@@ -1,0 +1,6 @@
+# Artefatos gerados pelo Python e pelo colcon
+__pycache__/
+*.py[cod]
+build/
+install/
+log/

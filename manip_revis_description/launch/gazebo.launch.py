@@ -1,13 +1,21 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, TimerAction, AppendEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, TimerAction, AppendEnvironmentVariable, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch.substitutions import LaunchConfiguration
+from launch_ros.parameter_descriptions import ParameterValue
 import xacro
 from os.path import join
 
 def generate_launch_description():
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time",
+        default_value="true",
+        description="Usar o relógio publicado pelo Gazebo em /clock",
+    )
+    use_sim_time = ParameterValue(LaunchConfiguration("use_sim_time"), value_type=bool)
 
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
     # O pacote principal é manip_revis_description
@@ -36,7 +44,7 @@ def generate_launch_description():
         executable='robot_state_publisher',
         name='robot_state_publisher',
         output='screen',
-        parameters=[robot_description],
+        parameters=[robot_description, {"use_sim_time": use_sim_time}],
     )
 
     gazebo = IncludeLaunchDescription(
@@ -80,6 +88,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        use_sim_time_arg,
         set_env_vars_resources_ign,
         set_env_vars_resources_gz,
         gazebo,

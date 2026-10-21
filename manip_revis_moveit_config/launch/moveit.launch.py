@@ -1,11 +1,20 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.actions import Node
 from moveit_configs_utils import MoveItConfigsBuilder
 
 
 def generate_launch_description():
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time",
+        default_value="false",
+        description="Usar /clock; ativar ao executar com o Gazebo",
+    )
+    use_sim_time = ParameterValue(LaunchConfiguration("use_sim_time"), value_type=bool)
 
     xacro_path = os.path.join(
         get_package_share_directory('manip_revis_description'),
@@ -27,7 +36,7 @@ def generate_launch_description():
         package='moveit_ros_move_group',
         executable='move_group',
         output='screen',
-        parameters=[moveit_config.to_dict()],
+        parameters=[moveit_config.to_dict(), {"use_sim_time": use_sim_time}],
     )
 
     rviz_config = os.path.join(
@@ -47,10 +56,12 @@ def generate_launch_description():
             moveit_config.robot_description_kinematics,
             moveit_config.planning_pipelines,
             moveit_config.joint_limits,
+            {"use_sim_time": use_sim_time},
         ],
     )
 
     return LaunchDescription([
+        use_sim_time_arg,
         move_group_node,
         rviz_node,
     ])
